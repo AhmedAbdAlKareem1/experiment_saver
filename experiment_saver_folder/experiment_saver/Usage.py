@@ -1,9 +1,6 @@
 from experiment_saver_folder.experiment_saver import ExperimentSaver, ExperimentConfig
 #For More Info Check experiment_saver Repo
 #https://github.com/AhmedAbdAlKareem1/experiment_saver
-#on the top of your code, 
-#cfg = ExperimentConfig(run_dir="runs/exp2")
-#saver = ExperimentSaver(cfg, class_names=your class name/s)
     #Binary Saver
 # 1) Create saver
 saver = ExperimentSaver(
@@ -85,4 +82,5 @@ saved_paths = saver.save_after_fit(
 )
 
 print("Saved files:", saved_paths)
+
 
