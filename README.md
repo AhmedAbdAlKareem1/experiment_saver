@@ -46,7 +46,6 @@ pip install .
 ```
 🚀 Quick Start
 1. Initialize the Saver
-Python
 ```
 from experiment_saver_folder.experiment_saver import ExperimentSaver, ExperimentConfig
 
@@ -102,6 +101,5 @@ positive_class_index: Index for binary softmax (default: 1).
 Missing metrics.csv?
 This usually happens if you didn't pass callbacks=saver.callbacks() into model.fit(), or if the training crashed before finishing the first epoch.
 
-Python
-# ✅ Correct usage:
+# Correct usage:
 model.fit(..., callbacks=saver.callbacks())
