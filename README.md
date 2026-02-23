@@ -1,28 +1,22 @@
 # experiment_saver
 
-A lightweight, safe utility for **TensorFlow / Keras** that automatically saves training artifacts and evaluation outputs for **binary classification** experiments.
+A lightweight, safe utility for **TensorFlow / Keras** that automatically saves training artifacts and evaluation outputs.
 
-It helps you keep every run organized in a single folder (models, history, logs, ROC files), so you can plot and compare results later without rewriting code.
+It keeps every run organized inside a single folder (models, logs, history, ROC files), so you can compare experiments later without rewriting boilerplate code.
 
 ---
 
-## Features
+## Highlights
 
-- **Easy callbacks**: auto-creates:
-  - `CSVLogger` (epoch metrics → `metrics.csv`)
-  - `ModelCheckpoint` (best model)
-  - `EarlyStopping` (restore best weights)
-- **Saves training history**: `history.json`
-- **Saves models**:
-  - `best_model.keras` (based on monitored metric)
-  - `final_model.keras` (end of training)
-- **Auto ROC evaluation** after training:
-  - `roc_fpr.npy`, `roc_tpr.npy`, `roc_thresholds.npy`
-  - `roc_auc.json`
-- **Shape-robust**:
-  - Supports `sigmoid` outputs: `(batch,)` or `(batch, 1)`
-  - Supports `softmax` outputs for binary: `(batch, 2)` (uses positive-class prob)
-- **Safe JSON config saving**: best-effort conversion of non-serializable values to strings
+- ✅ One-line callbacks: `CSVLogger`, `ModelCheckpoint`, `EarlyStopping`
+- ✅ Saves **best** + **final** model
+- ✅ Saves **history.json** + **metrics.csv**
+- ✅ Automatically computes **ROC / AUC** after training
+- ✅ Handles common output shapes safely:
+  - Sigmoid: `(batch,)` or `(batch, 1)`
+  - Softmax (binary): `(batch, 2)` (uses positive-class probability)
+  - Softmax (multiclass): `(batch, C)`
+- ✅ JSON-safe config saving (converts non-serializable values to strings)
 
 ---
 
@@ -30,16 +24,21 @@ It helps you keep every run organized in a single folder (models, history, logs,
 
 Inside your `run_dir/`:
 
-- `metrics.csv` — epoch-by-epoch logs (loss, accuracy, auc, val_loss, …)
-- `history.json` — same metrics as a JSON dictionary
-- `best_model.keras` — best checkpoint (based on `monitor`)
-- `final_model.keras` — final model at end of training
-- `roc_fpr.npy` — ROC false positive rate
-- `roc_tpr.npy` — ROC true positive rate
-- `roc_thresholds.npy` — ROC thresholds
-- `roc_auc.json` — ROC AUC value
-- `config.json` — experiment metadata (optional but recommended)
-- `classes.json` — class names (optional but useful)
+| File | Description |
+|------|------------|
+| `metrics.csv` | Epoch-by-epoch logs (loss, accuracy, auc, val_loss, …) |
+| `history.json` | Same history data as JSON |
+| `best_model.keras` | Best checkpoint (based on `monitor`) |
+| `final_model.keras` | Final model at end of training |
+| `roc_fpr.npy` | ROC false positive rate |
+| `roc_tpr.npy` | ROC true positive rate |
+| `roc_thresholds.npy` | ROC thresholds |
+| `roc_auc.json` | ROC AUC summary |
+| `config.json` | Experiment metadata (optional but recommended) |
+| `classes.json` | Class names (optional but useful) |
+| `manifest.json` | Index of important files for the run |
+
+> **Note:** `metrics.csv` is created by `CSVLogger`, so make sure you pass `callbacks=saver.callbacks()` into `model.fit()`.
 
 ---
 
@@ -51,3 +50,112 @@ Inside your `run_dir/`:
 git clone https://github.com/AhmedAbdAlKareem1/experiment_saver.git
 cd experiment_saver/experiment_saver_folder
 pip install .
+Quick Start
+Import
+from experiment_saver_folder.experiment_saver import ExperimentSaver, ExperimentConfig
+Binary Classification Example
+# 1) Create saver
+cfg = ExperimentConfig(
+    run_dir="runs/cat_dog_vgg16_exp001",
+    patience=5,
+    monitor="val_loss",
+    save_best_only=True,
+    verbose=1,
+)
+
+saver = ExperimentSaver(cfg, class_names=["Cat", "Dog"])
+
+# 2) Train with callbacks (required to generate metrics.csv)
+history = model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=5,
+    callbacks=saver.callbacks(),
+    verbose=1,
+)
+
+# 3) Save everything after training
+saved_paths = saver.save_after_fit(
+    model=model,
+    history=history,
+    val_ds=val_ds,
+    extra_config={
+        "optimizer": "Adam",
+        "lr": 1e-3,
+        "dataset_path": r"path_to_dataset",
+        "backbone": "VGG16",
+        "image_size": [224, 224],
+    },
+)
+
+print("Saved files:", saved_paths)
+Multi-Class Classification Example (HAM10000)
+# 1) Create saver
+cfg = ExperimentConfig(
+    run_dir="runs/ham10000_exp001",
+    patience=7,
+    monitor="val_loss",
+    save_best_only=True,
+    verbose=1,
+    roc_average="macro",
+    roc_multi_class="ovr",
+)
+
+saver = ExperimentSaver(
+    cfg,
+    class_names=["akiec", "bcc", "bkl", "df", "mel", "nv", "vasc"],
+)
+
+# 2) Train with callbacks
+history = model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=20,
+    callbacks=saver.callbacks(),
+    verbose=1,
+)
+
+# 3) Save everything after training
+saved_paths = saver.save_after_fit(
+    model=model,
+    history=history,
+    val_ds=val_ds,
+    extra_config={
+        "optimizer": "Adam",
+        "lr": 1e-4,
+        "dataset": "HAM10000",
+        "image_size": [224, 224],
+        "num_classes": 7,
+    },
+)
+
+print("Saved files:", saved_paths)
+Configuration
+ExperimentConfig:
+
+run_dir: folder where all artifacts are saved
+
+monitor: metric to track best model (e.g. "val_loss", "val_auc")
+
+patience: EarlyStopping patience
+
+save_best_only: saves checkpoint only when improved
+
+roc_average: "macro" | "micro" | "weighted"
+
+roc_multi_class: "ovr" | "ovo"
+
+positive_class_index: for binary softmax (batch,2) (default: 1)
+
+Tips / Common Issues
+metrics.csv is missing
+
+This usually happens when:
+
+you didn’t pass callbacks=saver.callbacks() into model.fit(), or
+
+training crashed before finishing the first epoch.
+
+✅ Fix:
+
+history = model.fit(..., callbacks=saver.callbacks())
