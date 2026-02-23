@@ -1,105 +1,137 @@
-# 🧪 experiment_saver
+# Experiment Saver
 
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0+-FF6F00?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![Keras](https://img.shields.io/badge/Keras-2.0+-D00000?logo=keras&logoColor=white)](https://keras.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A lightweight, safe utility for TensorFlow/Keras to automate the saving of model artifacts, training history, and evaluation metrics for binary classification tasks.
 
-A lightweight, safe utility for **TensorFlow / Keras** that automatically captures training artifacts and evaluation outputs. It keeps every run organized inside a single folder, allowing you to compare experiments without rewriting boilerplate code.
+## Features
+- **Callback Integration**: Automatically sets up `ModelCheckpoint`, `EarlyStopping`, and `CSVLogger`.
+- **Artifact Management**: Organizes models (`.keras`), history (`.json`), and class names in a single run directory.
+- **Auto-ROC Evaluation**: Automatically computes ROC curves (FPR, TPR, Thresholds) and AUC scores using the validation dataset after training.
+- **JSON Serialization**: Best-effort conversion of complex experiment configs into JSON-safe formats.
+- **Shape Agnostic**: Supports both `sigmoid` (1 unit) and `softmax` (2 units) output layers.
 
----
+## Installation
 
-## ✨ Highlights
-
-* 🚀 **One-line Callbacks**: Instant setup for `CSVLogger`, `ModelCheckpoint`, and `EarlyStopping`.
-* 💾 **Comprehensive Saving**: Automatically stores **best** + **final** models, `history.json`, and `metrics.csv`.
-* 📊 **Auto-Evaluation**: Automatically computes **ROC / AUC** curves after training.
-* 🛡️ **Smart Handling**: Safely manages common output shapes including Sigmoid, Binary Softmax, and Multiclass.
-* 📝 **Metadata Logging**: JSON-safe config saving that handles non-serializable values gracefully.
-
----
-
-## 📂 Project Structure
-
-All artifacts are organized within your specified `run_dir/`:
-
-| File | Description |
-| :--- | :--- |
-| `metrics.csv` | Epoch-by-epoch logs (loss, accuracy, AUC, etc.) |
-| `history.json` | Full training history in JSON format |
-| `best_model.keras` | The best checkpoint based on your monitor metric |
-| `final_model.keras` | The model state at the end of training |
-| `roc_fpr.npy` | ROC False Positive Rate data |
-| `roc_tpr.npy` | ROC True Positive Rate data |
-| `roc_auc.json` | ROC AUC summary results |
-| `config.json` | Optional experiment metadata and hyperparameters |
-| `manifest.json` | A master index of all generated files |
-
----
-
-## ⚙️ Installation
-
-### Install from Source
+### From Source
 ```bash
 git clone [https://github.com/AhmedAbdAlKareem1/experiment_saver.git](https://github.com/AhmedAbdAlKareem1/experiment_saver.git)
-cd experiment_saver/experiment_saver_folder
+cd experiment_saver
 pip install .
-```
-🚀 Quick Start
-1. Initialize the Saver
-```
-from experiment_saver_folder.experiment_saver import ExperimentSaver, ExperimentConfig
+Dependencies
+TensorFlow 2.x
 
-cfg = ExperimentConfig(
-    run_dir="runs/cat_dog_exp001",
+NumPy
+
+Scikit-learn
+
+Quick Start
+Python
+from experiment_saver import ExperimentSaver, ExperimentConfig
+
+# 1. Initialize Configuration
+config = ExperimentConfig(
+    run_dir="runs/cat_dog_vgg16_exp001", 
     patience=5,
-    monitor="val_loss",
-    save_best_only=True,
-    verbose=1
+    monitor="val_loss"
 )
 
-saver = ExperimentSaver(cfg, class_names=["Cat", "Dog"])
-2. Integrate with Training
-Pass the generated callbacks into model.fit() to ensure metrics.csv is created.
+# 2. Create Saver
+saver = ExperimentSaver(config=config, class_names=["Cat", "Dog"])
 
-Python
+# 3. Train with auto-generated callbacks
 history = model.fit(
     train_ds,
     validation_data=val_ds,
-    epochs=5,
+    epochs=50,
     callbacks=saver.callbacks(),
-    verbose=1
 )
-3. Save Artifacts
-Python
+
+# 4. Save everything (History, Final Model, ROC curves, Config)
 saved_paths = saver.save_after_fit(
     model=model,
     history=history,
     val_ds=val_ds,
     extra_config={
+        "backbone": "VGG16",
         "optimizer": "Adam",
-        "lr": 1e-3,
-        "backbone": "VGG16"
+        "lr": 1e-3
     }
 )
 
-```
-🔧 Configuration Details
-The ExperimentConfig class allows for fine-grained control:
+print(f"Artifacts saved to: {saved_paths['history_json']}")
+Saved Artifacts
+The utility creates the following structure in your run_dir:
 
-run_dir: Folder where all artifacts are saved.
+best_model.keras: The model weights with the best monitored metric.
 
-monitor: Metric to track for the best model (e.g., "val_loss").
+final_model.keras: The model state at the end of training.
 
-patience: Number of epochs for EarlyStopping.
+history.json: Full training history dictionary.
 
-roc_average: Strategy for multiclass ROC ("macro", "micro", or "weighted").
+metrics.csv: Epoch-by-epoch logs.
 
-positive_class_index: Index for binary softmax (default: 1).
+roc_fpr.npy / roc_tpr.npy: Arrays for plotting ROC curves.
 
-💡 Troubleshooting
-[!IMPORTANT]
-Missing metrics.csv?
-This usually happens if you didn't pass callbacks=saver.callbacks() into model.fit(), or if the training crashed before finishing the first epoch.
+roc_auc.json: The calculated Area Under the Curve.
 
-# Correct usage:
-model.fit(..., callbacks=saver.callbacks())
+config.json: Metadata about the experiment parameters.
+
+
+---
+
+### 2. `setup.py`
+This allows users to install your repo using `pip install .`.
+
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name="experiment_saver",
+    version="0.1.0",
+    author="Ahmed Abd Al-Kareem",
+    description="A utility to safely save Keras experiments and ROC metrics",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/AhmedAbdAlKareem1/experiment_saver",
+    packages=find_packages(),
+    install_requires=[
+        "numpy",
+        "scikit-learn",
+        "tensorflow>=2.0.0",
+    ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    ],
+    python_requires='>=3.7',
+)
+3. requirements.txt
+Plaintext
+numpy
+scikit-learn
+tensorflow>=2.0.0
+4. Implementation Note (experiment_saver/__init__.py)
+To make imports clean, put this in your __init__.py:
+
+Python
+from .saver import ExperimentSaver, ExperimentConfig
+
+__all__ = ["ExperimentSaver", "ExperimentConfig"]
+5. .gitignore
+Make sure to ignore the actual experiment data so you don't accidentally push large model files to GitHub:
+
+Plaintext
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Experiments and Models
+runs/
+*.keras
+*.h5
+*.npy
+
+# Environment
+venv/
+.env
