@@ -1,23 +1,78 @@
-🧪 experiment_saverA lightweight, safe utility for TensorFlow / Keras that automatically captures training artifacts and evaluation outputs. Stop rewriting boilerplate code and start comparing experiments with ease.✨ Highlights🚀 One-line Callbacks: Instant setup for CSVLogger, ModelCheckpoint, and EarlyStopping.💾 Comprehensive Saving: Automatically stores best + final models, history.json, and metrics.csv.📊 Auto-Evaluation: Computes ROC / AUC curves immediately after training.🛡️ Smart Handling: Safely manages common output shapes (Sigmoid, Binary Softmax, Multiclass).📝 Metadata Logging: JSON-safe config saving that handles non-serializable values gracefully.📂 Project StructureAll artifacts are organized within your specified run_dir/:CategoryFileDescriptionLogsmetrics.csvEpoch-by-epoch logs (loss, accuracy, AUC, etc.)history.jsonFull training history in JSON formatModelsbest_model.kerasThe "best" checkpoint based on your monitor metricfinal_model.kerasThe model state at the final epochEvaluationroc_fpr.npy / tpr.npyRaw ROC curve data for plottingroc_auc.jsonSummary of AUC scoresMetadataconfig.jsonExperiment hyperparameters and metadatamanifest.jsonA master index of all generated files⚙️ InstallationInstall from SourceBashgit clone https://github.com/AhmedAbdAlKareem1/experiment_saver.git
+# 🧪 experiment_saver
+
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0+-FF6F00?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
+[![Keras](https://img.shields.io/badge/Keras-2.0+-D00000?logo=keras&logoColor=white)](https://keras.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A lightweight, safe utility for **TensorFlow / Keras** that automatically captures training artifacts and evaluation outputs. It keeps every run organized inside a single folder, allowing you to compare experiments without rewriting boilerplate code.
+
+---
+
+## ✨ Highlights
+
+* 🚀 **One-line Callbacks**: Instant setup for `CSVLogger`, `ModelCheckpoint`, and `EarlyStopping`.
+* 💾 **Comprehensive Saving**: Automatically stores **best** + **final** models, `history.json`, and `metrics.csv`.
+* 📊 **Auto-Evaluation**: Automatically computes **ROC / AUC** curves after training.
+* 🛡️ **Smart Handling**: Safely manages common output shapes including Sigmoid, Binary Softmax, and Multiclass.
+* 📝 **Metadata Logging**: JSON-safe config saving that handles non-serializable values gracefully.
+
+---
+
+## 📂 Project Structure
+
+All artifacts are organized within your specified `run_dir/`:
+
+| File | Description |
+| :--- | :--- |
+| `metrics.csv` | Epoch-by-epoch logs (loss, accuracy, AUC, etc.) |
+| `history.json` | Full training history in JSON format |
+| `best_model.keras` | The best checkpoint based on your monitor metric |
+| `final_model.keras` | The model state at the end of training |
+| `roc_fpr.npy` | ROC False Positive Rate data |
+| `roc_tpr.npy` | ROC True Positive Rate data |
+| `roc_auc.json` | ROC AUC summary results |
+| `config.json` | Optional experiment metadata and hyperparameters |
+| `manifest.json` | A master index of all generated files |
+
+---
+
+## ⚙️ Installation
+
+### Install from Source
+```bash
+git clone [https://github.com/AhmedAbdAlKareem1/experiment_saver.git](https://github.com/AhmedAbdAlKareem1/experiment_saver.git)
 cd experiment_saver/experiment_saver_folder
 pip install .
-🚀 Quick Start1. Basic SetupPythonfrom experiment_saver_folder.experiment_saver import ExperimentSaver, ExperimentConfig
+```
+🚀 Quick Start
+1. Initialize the Saver
+Python
+```
+from experiment_saver_folder.experiment_saver import ExperimentSaver, ExperimentConfig
 
 cfg = ExperimentConfig(
-    run_dir="runs/cat_dog_vgg16_exp001",
+    run_dir="runs/cat_dog_exp001",
     patience=5,
     monitor="val_loss",
-    save_best_only=True
+    save_best_only=True,
+    verbose=1
 )
 
 saver = ExperimentSaver(cfg, class_names=["Cat", "Dog"])
-2. TrainingPass the generated callbacks into your model.fit() call to ensure metrics are logged correctly.Pythonhistory = model.fit(
+2. Integrate with Training
+Pass the generated callbacks into model.fit() to ensure metrics.csv is created.
+
+Python
+history = model.fit(
     train_ds,
     validation_data=val_ds,
-    epochs=10,
-    callbacks=saver.callbacks() # Essential for metrics.csv
+    epochs=5,
+    callbacks=saver.callbacks(),
+    verbose=1
 )
-3. Post-Training ExportPythonsaved_paths = saver.save_after_fit(
+3. Save Artifacts
+Python
+saved_paths = saver.save_after_fit(
     model=model,
     history=history,
     val_ds=val_ds,
@@ -27,4 +82,26 @@ saver = ExperimentSaver(cfg, class_names=["Cat", "Dog"])
         "backbone": "VGG16"
     }
 )
-🔧 Configuration DetailsThe ExperimentConfig class allows for fine-grained control:run_dir: The destination folder for all artifacts.monitor: Metric to track (e.g., "val_auc").roc_average: Strategy for multiclass ("macro", "micro", or "weighted").positive_class_index: For binary softmax models (defaults to 1).💡 Troubleshooting[!TIP]Missing metrics.csv? > This usually happens if you forgot to pass callbacks=saver.callbacks() into model.fit(), or if the training crashed before the first epoch completed.
+
+```
+🔧 Configuration Details
+The ExperimentConfig class allows for fine-grained control:
+
+run_dir: Folder where all artifacts are saved.
+
+monitor: Metric to track for the best model (e.g., "val_loss").
+
+patience: Number of epochs for EarlyStopping.
+
+roc_average: Strategy for multiclass ROC ("macro", "micro", or "weighted").
+
+positive_class_index: Index for binary softmax (default: 1).
+
+💡 Troubleshooting
+[!IMPORTANT]
+Missing metrics.csv?
+This usually happens if you didn't pass callbacks=saver.callbacks() into model.fit(), or if the training crashed before finishing the first epoch.
+
+Python
+# ✅ Correct usage:
+model.fit(..., callbacks=saver.callbacks())
