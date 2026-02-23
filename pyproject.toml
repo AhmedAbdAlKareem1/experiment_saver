@@ -1,23 +1,27 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "experiment-saver"
 version = "0.1.0"
-description = "A lightweight, safe utility for TensorFlow/Keras that captures training artifacts and evaluation outputs."
+description = "A lightweight utility for TensorFlow/Keras to save training artifacts and evaluation metrics."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "AhmedAbdAlKareem1" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
-  "tensorflow>=2.10.1",
+  "tensorflow>=2.10.0",
   "numpy",
   "scikit-learn",
 ]
 
-[tool.setuptools]
-package-dir = { "" = "experiment_saver_folder" }
-
 [tool.setuptools.packages.find]
-where = ["experiment_saver_folder"]
+where = ["."]
+include = ["experiment_saver*"]
