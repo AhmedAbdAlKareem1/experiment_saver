@@ -56,10 +56,10 @@ Note: dependencies depend on which backend you use (TensorFlow or PyTorch).
 TensorFlow / Keras usage
 ```
 import tensorflow as tf
-from saver_tensorflow import ExperimentSaver, ExperimentConfig
+from experiment_saver import TFExperimentSaver, TFExperimentConfig
 
-saver = ExperimentSaver(
-    config=ExperimentConfig(
+saver = TFExperimentSaver(
+    config=TFExperimentConfig(
         run_dir="runs/keras_exp001",
         monitor="val_loss",
         patience=5,
@@ -97,10 +97,10 @@ import time
 import torch
 from torch.utils.data import DataLoader
 
-from experiment_saver_torch import ExperimentSaver, ExperimentConfig
+from experiment_saver import TorchExperimentSaver, TorchExperimentConfig
 
-saver = ExperimentSaver(
-    config=ExperimentConfig(
+saver = TorchExperimentSaver(
+    config=TorchExperimentConfig(
         run_dir="runs/torch_exp001",
         monitor="val_loss",
         patience=5,
@@ -183,3 +183,4 @@ ROC/AUC is computed using scikit-learn.
 Multiclass classification is supported (softmax with C classes).
 
 ROC/AUC is computed using scikit-learn.
+
