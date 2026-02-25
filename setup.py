@@ -1,37 +1,33 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-# Read README safely
-this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text(encoding="utf-8")
+this_dir = Path(__file__).parent
+readme_path = this_dir / "README.md"
+long_description = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
 
 setup(
-    name="experiment_saver",
+    name="experiment-saver",  # pip name
     version="0.1.0",
-    author="Ahmed Abd Al-Kareem",
-    description="A utility to safely save Keras experiments and ROC metrics",
+    author="AhmedAbdAlKareem1",
+    description="Experiment saver utilities for TensorFlow/Keras and PyTorch.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/AhmedAbdAlKareem1/experiment_saver",
     packages=find_packages(),
     include_package_data=True,
+    python_requires=">=3.8",
     install_requires=[
-        "numpy>=1.19",
-        "scikit-learn>=0.24",
+        "numpy",
+        "scikit-learn",
     ],
     extras_require={
-        "tf": ["tensorflow>=2.0"],
-        "torch": ["torch>=1.0", "torchvision>=0.8"],
+        "tf": ["tensorflow>=2.10.0"],
+        "torch": ["torch>=1.0", "torchvision"],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "License :: OSI Approved :: MIT License",
     ],
-    python_requires=">=3.8",
 )
