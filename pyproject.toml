@@ -8,18 +8,22 @@ version = "0.1.0"
 description = "A lightweight utility for TensorFlow/Keras to save training artifacts and evaluation metrics."
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+license = { text = "MIT" }
 authors = [{ name = "AhmedAbdAlKareem1" }]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
 dependencies = [
-  "tensorflow>=2.10.0",
   "numpy",
   "scikit-learn",
 ]
+
+[project.optional-dependencies]
+tf = ["tensorflow>=2.10.0"]
+torch = ["torch>=1.0", "torchvision"]
 
 [tool.setuptools.packages.find]
 where = ["."]
