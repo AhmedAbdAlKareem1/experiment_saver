@@ -1,6 +1,6 @@
 # Experiment Saver
 
-A lightweight, safe utility for TensorFlow/Keras to automate the saving of model artifacts, training history, and evaluation metrics for binary classification tasks.
+A lightweight, safe utility for TensorFlow/Keras to automate the saving of model artifacts, training history, and evaluation metrics.
 
 ## Features
 - **Callback Integration**: Automatically sets up `ModelCheckpoint`, `EarlyStopping`, and `CSVLogger`.
@@ -79,41 +79,8 @@ roc_auc.json: The calculated Area Under the Curve.
 
 config.json: Metadata about the experiment parameters.
 
-
----
-
-### 2. `setup.py`
-This allows users to install your repo using `pip install .`.
-
-```python
-
-3. requirements.txt
-Plaintext
-numpy
-scikit-learn
-tensorflow>=2.0.0
-4. Implementation Note (experiment_saver/__init__.py)
-To make imports clean, put this in your __init__.py:
-
-Python
-from .saver import ExperimentSaver, ExperimentConfig
-
-__all__ = ["ExperimentSaver", "ExperimentConfig"]
-5. .gitignore
-Make sure to ignore the actual experiment data so you don't accidentally push large model files to GitHub:
-
-Plaintext
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-
-# Experiments and Models
-runs/
-*.keras
-*.h5
-*.npy
-
 # Environment
 venv/
 
 .env
+
