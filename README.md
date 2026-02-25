@@ -12,10 +12,13 @@ A lightweight, safe utility for TensorFlow/Keras to automate the saving of model
 ## Installation
 
 ### From Source
-```bash
+```
 git clone [https://github.com/AhmedAbdAlKareem1/experiment_saver.git](https://github.com/AhmedAbdAlKareem1/experiment_saver.git)
+```
+```
 cd experiment_saver
 pip install .
+```
 Dependencies
 TensorFlow 2.x
 
@@ -23,8 +26,8 @@ NumPy
 
 Scikit-learn
 
-Quick Start
-Python
+#Quick Start
+```
 from experiment_saver import ExperimentSaver, ExperimentConfig
 
 # 1. Initialize Configuration
@@ -58,6 +61,7 @@ saved_paths = saver.save_after_fit(
 )
 
 print(f"Artifacts saved to: {saved_paths['history_json']}")
+```
 Saved Artifacts
 The utility creates the following structure in your run_dir:
 
@@ -82,30 +86,7 @@ config.json: Metadata about the experiment parameters.
 This allows users to install your repo using `pip install .`.
 
 ```python
-from setuptools import setup, find_packages
 
-setup(
-    name="experiment_saver",
-    version="0.1.0",
-    author="Ahmed Abd Al-Kareem",
-    description="A utility to safely save Keras experiments and ROC metrics",
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    url="https://github.com/AhmedAbdAlKareem1/experiment_saver",
-    packages=find_packages(),
-    install_requires=[
-        "numpy",
-        "scikit-learn",
-        "tensorflow>=2.0.0",
-    ],
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    ],
-    python_requires='>=3.7',
-)
 3. requirements.txt
 Plaintext
 numpy
@@ -134,4 +115,5 @@ runs/
 
 # Environment
 venv/
+
 .env
