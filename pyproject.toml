@@ -22,6 +22,8 @@ Issues = "https://github.com/AhmedAbdAlKareem1/experiment_saver/issues"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
+license = "MIT"
+license-files = ["LICENSE"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
